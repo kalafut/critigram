@@ -24,11 +24,16 @@ prepare_configs = (configs)->
             for v, i in cfg.buckets
                 cfg.inv_buckets[v] = i
 
-        console.log(cfg)
-
 populate_select = (config_id, config_list)->
     select = $("#"+config_id)
     select.append("<option value=\"#{i}\">#{cfg.title}</option>") for cfg,i in config_list
+
+parse_ratings = (text)->
+    ratings_raw = text.match(re)
+    if ratings_raw?
+        ratings = _.map(ratings_raw, (v)->parseInt(v))
+    else
+        ratings = []
 
 calc = (force)->
     data = document.getElementById("data").value
@@ -37,15 +42,12 @@ calc = (force)->
 
     last_data = data
     last_width = window.innerWidth
-    ratings_raw = data.match(re)
-    if ratings_raw?
-        ratings = _.map(ratings_raw, (v)->parseInt(v))
-    else
-        ratings = []
+
+    ratings = parse_ratings(data)
 
     graph(ratings)
 
-stratify = (rankings)->
+stratify = (rankings, active_config)->
     if active_config.range?
         range = active_config.range
         interval = active_config.interval
@@ -57,21 +59,23 @@ stratify = (rankings)->
 
     values = Array.apply(null, new Array(num_buckets)).map(Number.prototype.valueOf,0)
     _.each rankings, (v)->
+        b = null
         if range?
-            b = if v > 0 then Math.floor((v-1)/interval) else 0
+            if 0 <= v <= range
+                b = if v > 0 then Math.floor((v-1)/interval) else 0
         else
             if active_config.continuous
-                b = v
+                if 0 <= v <= _.last(active_config.buckets)
+                    b = v
             else
                 b = active_config.inv_buckets[v]
-        values[b] += 1
+        values[b] += 1 unless not b?
 
-    merge = _.zip(labels, values)
-    merge.unshift(["Ranking", "Count"])
-    return merge
+    _.zip(labels, values)
 
 graph = (rankings)->
-    merge = stratify(rankings, 100, 20)
+    merge = stratify(rankings, active_config)
+    merge.unshift(["Ranking", "Count"])
     data = google.visualization.arrayToDataTable(merge)
 
     options =
@@ -90,4 +94,5 @@ config_chg = ()->
 prepare_configs(configs)
 populate_select("config_list", configs)
 $("#config_list").change(config_chg)
-setInterval(calc, 1000)
+
+setInterval(calc, 1000) unless QUnit?  # Don't monitor if testing
