@@ -8,7 +8,7 @@ configs = [
     { title: "0-100, by 5",  range: 100,  interval: 5 }
     { title: "0-10",  buckets:[0..10] }
     { title: "0-5", buckets:[0..5] }
-    { title: "0/25/50/100",  buckets:[0,25,50,75,100] }
+    { title: "0/25/50/75/100",  buckets:[0,25,50,75,100] }
     { title: "0/20/40/60/80/100",  buckets:[0,20,40,60,80,100] }
 ]
 
