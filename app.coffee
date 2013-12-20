@@ -25,7 +25,7 @@ prepare_configs = (configs)->
 
 populate_select = (config_id, config_list)->
     select = $("#"+config_id)
-    select.append("<option value=\"#{i}\">#{cfg.title}</option>") for cfg,i in config_list
+    select.append("</option><option value=\"#{i}\">#{cfg.title}</option>") for cfg,i in config_list
 
 parse_ratings = (text)->
     ratings_raw = text.match(re)
@@ -58,19 +58,22 @@ stratify = (rankings, active_config)->
 
     values = Array.apply(null, new Array(num_buckets)).map(Number.prototype.valueOf,0)
     _.each rankings, (v)->
-        b = null
-        if range?
-            if 0 <= v <= range
+        if valid(v, active_config)
+            if range?
                 b = if v > 0 then Math.floor((v-1)/interval) else 0
-        else
-            if active_config.continuous
-                if 0 <= v <= _.last(active_config.buckets)
-                    b = v
             else
-                b = active_config.inv_buckets[v]
-        values[b] += 1 unless not b?
+                if active_config.continuous
+                    b = v
+                else
+                    b = active_config.inv_buckets[v]
+            values[b] += 1
 
     _.zip(labels, values)
+
+valid = (v, cfg)->
+    (cfg.range? and (0 <= v <= cfg.range)) or
+    (cfg.buckets? and cfg.continuous and (0 <= v <= _.last(cfg.buckets))) or
+    (cfg.buckets? and not cfg.continuous)
 
 graph = (rankings)->
     merge = stratify(rankings, active_config)
@@ -87,7 +90,7 @@ graph = (rankings)->
 
 config_chg = ()->
     sel = document.getElementById("config_list")
-    active_config = configs[sel.selectedIndex]
+    active_config = configs[sel.selectedIndex - 1]
     calc(true)
 
 prepare_configs(configs)
