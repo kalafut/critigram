@@ -84,6 +84,7 @@ graph = (rankings)->
           hAxis: {title: 'Rating'}
           vAxis: {title: 'Number of ratings'}
           legend: { position: "none" }
+          colors:['#DC8F11']
 
     chart = new google.visualization.ColumnChart(document.getElementById('graph'))
     chart.draw(data, options)
