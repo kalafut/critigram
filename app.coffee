@@ -8,11 +8,23 @@ configs = [
     { title: "0-100, by 5",  range: 100,  interval: 5 }
     { title: "0-100, by 25 [slots]",  buckets:[0,25,50,75,100] }
     { title: "0-10 [slots]",  buckets:[0..10] }
-    { title: "0-5 [slots]",  buckets:[0..5] }
+    { title: "0-5 [slots]", buckets:[0..5] }
 ]
 
 active_config = configs[0]
 
+prepare_configs = (configs)->
+    _.each configs, (cfg)->
+        if(cfg.range? and cfg.buckets?) or (cfg.range? and not cfg.interval?)
+            throw("Error in " + cfg.title)
+        if cfg.buckets?
+            cfg.continuous = (_.last(cfg.buckets) - _.first(cfg.buckets)) == cfg.buckets.length - 1
+        if cfg.buckets and not cfg.continuous
+            cfg.inv_buckets = []
+            for v, i in cfg.buckets
+                cfg.inv_buckets[v] = i
+
+        console.log(cfg)
 
 populate_select = (config_id, config_list)->
     select = $("#"+config_id)
@@ -48,7 +60,10 @@ stratify = (rankings)->
         if range?
             b = if v > 0 then Math.floor((v-1)/interval) else 0
         else
-            b = v
+            if active_config.continuous
+                b = v
+            else
+                b = active_config.inv_buckets[v]
         values[b] += 1
 
     merge = _.zip(labels, values)
@@ -72,6 +87,7 @@ config_chg = ()->
     active_config = configs[sel.selectedIndex]
     calc(true)
 
+prepare_configs(configs)
 populate_select("config_list", configs)
 $("#config_list").change(config_chg)
 setInterval(calc, 1000)
