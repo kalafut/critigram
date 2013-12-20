@@ -6,17 +6,16 @@ last_width = null
 configs = [
     { title: "0-100, by 10", range: 100, interval: 10 }
     { title: "0-100, by 5",  range: 100,  interval: 5 }
-    { title: "0-100, by 25 [slots]",  buckets:[0,25,50,75,100] }
-    { title: "0-10 [slots]",  buckets:[0..10] }
-    { title: "0-5 [slots]", buckets:[0..5] }
+    { title: "0-10",  buckets:[0..10] }
+    { title: "0-5", buckets:[0..5] }
+    { title: "0/25/50/100",  buckets:[0,25,50,75,100] }
+    { title: "0/20/40/60/80/100",  buckets:[0,20,40,60,80,100] }
 ]
 
 active_config = configs[0]
 
 prepare_configs = (configs)->
     _.each configs, (cfg)->
-        if(cfg.range? and cfg.buckets?) or (cfg.range? and not cfg.interval?)
-            throw("Error in " + cfg.title)
         if cfg.buckets?
             cfg.continuous = (_.last(cfg.buckets) - _.first(cfg.buckets)) == cfg.buckets.length - 1
         if cfg.buckets and not cfg.continuous

@@ -57,7 +57,7 @@ test "Ranges", ()->
         ["91-100",3] ]))
 
 test "Continuous Buckets", ()->
-    active_config = configs[3]
+    active_config = configs[2]
     ratings = [-1,0,1,1,3,5,6,6,6,8,10,11]
     deepEqual(stratify(ratings, active_config), ([
         ["0",1],
@@ -84,4 +84,21 @@ test "Continuous Buckets", ()->
         ["8",1],
         ["9",0],
         ["10",1] ]))
+
+test "Discrete Buckets", ()->
+    active_config = configs[4]
+    ratings = [-25,-1,0,0,25,25,25,75,100,100,100,101,125]
+    deepEqual(stratify(ratings, active_config), ([
+        ["0",2],
+        ["25",3],
+        ["50",0],
+        ["75",1],
+        ["100",3] ]))
+    shuf_ratings = _.shuffle(ratings)
+    deepEqual(stratify(shuf_ratings, active_config), ([
+        ["0",2],
+        ["25",3],
+        ["50",0],
+        ["75",1],
+        ["100",3] ]))
 
